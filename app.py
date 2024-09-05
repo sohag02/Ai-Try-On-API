@@ -43,6 +43,10 @@ def allowed_file(filename):
 def setup():
     app.before_request_funcs[None].remove(setup)
     app.config['SERVER_NAME'] = get_base_url(request.base_url)
+    # Check DB
+    res = redis_client.ping()
+    if res:
+        print("Redis is connected")
 
 
 @app.route('/')
