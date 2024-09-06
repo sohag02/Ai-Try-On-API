@@ -129,6 +129,7 @@ def process_images_async(task_id, person_image_path, garment_image_path):
             os.remove(garment_image_path)
 
         except Exception as e:
+            print(e)
             data = {
                 'status': 'Error',
                 'error': str(e.__class__.__name__)
@@ -159,6 +160,7 @@ def process_virtual_try_on(person_image_path, garment_image_path):
             url = url_for('static', filename=path.replace('static/', '', 1))
         return url, None
     except Exception as e:
+        print(e)
         return None, str(e.__class__.__name__)
 
 
