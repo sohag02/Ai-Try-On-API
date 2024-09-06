@@ -107,7 +107,7 @@ def process_images_async(task_id, person_image_path, garment_image_path):
             redis_client.set(task_id, json.dumps(data))
 
             # Replace with your actual image processing logic
-            result_image_path = process_virtual_try_on(
+            result_image_path, error = process_virtual_try_on(
                 person_image_path, garment_image_path)
 
             # Simulate task completion
@@ -120,7 +120,7 @@ def process_images_async(task_id, person_image_path, garment_image_path):
             else:
                 data = {
                     'status': 'Error',
-                    'error': 'Image processing failed'
+                    'error': f'Image processing failed : {error}'
                 }
                 redis_client.set(task_id, json.dumps(data))
 
@@ -157,9 +157,9 @@ def process_virtual_try_on(person_image_path, garment_image_path):
         path = move_to_result_folder(result, RESULT_FOLDER)
         with app.app_context():
             url = url_for('static', filename=path.replace('static/', '', 1))
-        return url
-    except Exception:
-        return None
+        return url, None
+    except Exception as e:
+        return None, str(e.__class__.__name__)
 
 
 if __name__ == '__main__':
