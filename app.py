@@ -143,7 +143,7 @@ def process_images_async(task_id, person_image_path, garment_image_path):
 
 def process_virtual_try_on(person_image_path, garment_image_path):
     try:
-        client = Client("yisol/IDM-VTON", )
+        client = Client("yisol/IDM-VTON", download_files=False)
         result = client.predict(
             dict={"background": handle_file(
                 person_image_path), "layers": [], "composite": None},
@@ -155,10 +155,9 @@ def process_virtual_try_on(person_image_path, garment_image_path):
             seed=42,
             api_name="/tryon",
         )
-        path = move_to_result_folder(result[0], RESULT_FOLDER)
-        with app.app_context():
-            url = url_for('static', filename=path.replace('static/', '', 1))
-        return url, None
+        image_url = result[0]['url']
+        print(f'Generated image URL: {image_url}')
+        return image_url, None
     except Exception as e:
         print(e)
         return None, str(e.__class__.__name__)

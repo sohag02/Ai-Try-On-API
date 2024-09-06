@@ -1,9 +1,10 @@
 import requests
 import time
 
+BASE_URL = 'http://127.0.0.1:5000' #'https://ai-try-on-api.onrender.com'
 # Replace with your Flask API URL
-UPLOAD_URL = 'http://localhost:5000/upload'
-STATUS_URL = 'http://localhost:5000/status'
+UPLOAD_URL = f'{BASE_URL}/upload'
+STATUS_URL = f'{BASE_URL}/status'
 
 # Paths to the images you want to upload
 PERSON_IMAGE_PATH = 'a_photo_of_sj (9).jpeg'
