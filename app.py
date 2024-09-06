@@ -1,7 +1,7 @@
 import os
 import threading
 import uuid
-
+import json
 import redis
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request, url_for
@@ -76,7 +76,10 @@ def upload_images():
         garment_image.save(garment_image_path)
 
         # Initialize task status in Redis
-        redis_client.set(task_id, 'Processing')
+        data = {
+            'status': 'Processing'
+        }
+        redis_client.set(task_id, json.dumps(data))
 
         # Process the images asynchronously
         process_images_async(task_id, person_image_path, garment_image_path)
@@ -88,15 +91,9 @@ def upload_images():
 
 @app.route('/status/<task_id>', methods=['GET'])
 def get_status(task_id):
-    status = redis_client.get(task_id)
-    if status:
-        if status.decode('utf-8') not in ['Processing', 'Error']:
-            return jsonify({
-                'status': 'Completed',
-                'url': status.decode('utf-8')
-            })
-        else:
-            return jsonify({'status': status.decode('utf-8')})
+    if status := redis_client.get(task_id):
+        data = json.loads(status.decode('utf-8'))
+        return jsonify(data)
     return jsonify({'status': 'Task not found'}), 404
 
 
@@ -104,7 +101,10 @@ def process_images_async(task_id, person_image_path, garment_image_path):
     def process():
         try:
             # Update task status
-            redis_client.set(task_id, 'Processing')
+            data = {
+                'status': 'Processing'
+            }
+            redis_client.set(task_id, json.dumps(data))
 
             # Replace with your actual image processing logic
             result_image_path = process_virtual_try_on(
@@ -112,16 +112,28 @@ def process_images_async(task_id, person_image_path, garment_image_path):
 
             # Simulate task completion
             if result_image_path:
-                redis_client.set(task_id, result_image_path)
+                data = {
+                    'status': 'Completed',
+                    'url': result_image_path
+                }
+                redis_client.set(task_id, json.dumps(data))
             else:
-                redis_client.set(task_id, 'Error')
+                data = {
+                    'status': 'Error',
+                    'error': 'Image processing failed'
+                }
+                redis_client.set(task_id, json.dumps(data))
 
             # Delete the temporary files
             os.remove(person_image_path)
             os.remove(garment_image_path)
 
-        except:
-            redis_client.set(task_id, 'Error')
+        except Exception as e:
+            data = {
+                'status': 'Error',
+                'error': str(e.__class__.__name__)
+            }
+            redis_client.set(task_id, json.dumps(data))
 
     # Run the processing in a separate thread
     thread = threading.Thread(target=process)
@@ -146,7 +158,7 @@ def process_virtual_try_on(person_image_path, garment_image_path):
         with app.app_context():
             url = url_for('static', filename=path.replace('static/', '', 1))
         return url
-    except:
+    except Exception:
         return None
 
 
