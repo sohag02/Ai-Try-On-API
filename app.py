@@ -83,7 +83,7 @@ def upload_images():
         data = {
             'status': 'Processing'
         }
-        redis_client.set(task_id, json.dumps(data))
+        redis_client.set(task_id, json.dumps(data), ex=60 * 60)
 
         # Process the images asynchronously
         process_images_async(task_id, person_image_path, garment_image_path)
