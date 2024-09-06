@@ -155,7 +155,7 @@ def process_virtual_try_on(person_image_path, garment_image_path):
             seed=42,
             api_name="/tryon",
         )
-        path = move_to_result_folder(result, RESULT_FOLDER)
+        path = move_to_result_folder(result[0], RESULT_FOLDER)
         with app.app_context():
             url = url_for('static', filename=path.replace('static/', '', 1))
         return url, None
