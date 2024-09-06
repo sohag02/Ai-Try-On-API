@@ -7,12 +7,16 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, request, url_for
 from gradio_client import Client, handle_file
 from werkzeug.utils import secure_filename
+from flask_cors import CORS
 
 from utils import get_base_url, move_to_result_folder
 
 load_dotenv()
 
 app = Flask(__name__)
+
+# Enable CORS
+CORS(app)
 
 app.config['APPLICATION_ROOT'] = '/'
 app.config['PREFERRED_URL_SCHEME'] = 'http'
